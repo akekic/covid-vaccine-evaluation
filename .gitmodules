@@ -1,0 +1,3 @@
+[submodule "covid-vaccine-dynamics"]
+	path = covid-vaccine-dynamics
+	url = git@github.com:Priesemann-Group/covid-vaccine-dynamics.git
