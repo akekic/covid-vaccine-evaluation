@@ -1,0 +1,2 @@
+source: https://data.gov.il/dataset/covid-19/resource/9b623a64-f7df-4d0c-9f57-09bd99a88880?inner_span=True
+download date: 2022-01-03

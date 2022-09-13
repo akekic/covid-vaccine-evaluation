@@ -1,0 +1,4 @@
+vaccination-policy: young_first
+input-dir: "data/factorisation-with-fit"
+load-correction-factor: true
+save-output: true

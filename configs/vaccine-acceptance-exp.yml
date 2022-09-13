@@ -1,0 +1,12 @@
+input-dir: "data/factorisation-with-fit"
+acceptance-rate-delta: [0.0, 0.6]
+load-correction-factor: true
+save-output: true
+C-mat-param: 80
+V1-eff: 70
+V2-eff: 90
+V3-eff: 95
+draws: 500
+influx: 0.5
+samples: 1000
+workers: 64

@@ -1,0 +1,6 @@
+ConfigArgParse
+numpy
+tqdm
+pandas
+notebook
+jupytext

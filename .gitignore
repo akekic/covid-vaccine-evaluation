@@ -1,0 +1,29 @@
+# os specific
+.DS_Store
+
+# keeper cloud storage
+Cared-Data-Certificate-HowTo.pdf
+archive-metadata.md
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# jupyter notebooks
+*.ipynb*
+
+# data
+*.xlsx
+
+
+# IDE
+.idea/
+
+# directories
+run/
+notebooks/plots
+tmp/
+
+# other
+*.pdf
