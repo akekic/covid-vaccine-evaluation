@@ -19,6 +19,6 @@ setup(
     description="Simulation-assisted causal modeling for evaluating counterfactual COVID-19 vaccine allocations strategies",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    python_requires=">=3.6.0",
+    python_requires=">=3.9.0",
     install_requires=parse_requirements("./requirements.txt"),
 )

@@ -4,7 +4,8 @@
 
 The infection dynamics simulation code is included as a submodule. Clone this repository and initialize submodules with
 ```bash
-git clone git@github.com:akekic/covid-vaccine-policy.git
+git clone git@github.com:akekic/covid-vaccine-evaluation.git
+cd covid-vaccine-evaluation
 git submodule init
 git submodule update 
 ```
@@ -33,6 +34,8 @@ jupytext notebooks/*.py --to .ipynb
 jupytext data_preprocessing/*.py --to .ipynb
 ```
 
+The entire installation process can take up to 2 hours, mostly depending on how fast the data can be downloaded.
+
 ## Data preparation
 
 The raw input data is stored under `data/input-data`.
@@ -42,7 +45,9 @@ The script is run with
 cd data_preprocessing
 python israel_data_processing.py
 ```
-This creates preprocessed data in `data/preprocessed_data`.
+This creates two pickled dataframes in `data/preprocessed_data`:
+- `israel_df.pkl`,
+- `israel_constants.pkl`.
 
 We then estimate the severity factorisation
 ```bash
@@ -70,8 +75,50 @@ where `<VACCINE_ALLOCATION_STRATEGY>` is one of the following:
 - `elderly-first`.
 
 This saves the results in `run/YYYY-MM-DD_HH-MM-SS_<VACCINE_ALLOCATION_STRATEGY>/`.
+The run output file format is shown [here](#run-output-files).
 
-## Output files
+## Reproduce results
+### Counterfactual vaccine allocation strategies
+
+To reproduce the results for the different vaccine allocation strategies run
+```bash
+python experiments/policy_exp.py --config configs/policy-exp.yml
+```
+which will save the results in `run/YYYY-MM-DD_HH-MM-SS.FFFFFF_policy_exp/`.
+The run can be analysed with the notebook`notebooks/va_strategy_experiment_analysis.ipynb`.
+Runtime: 5.5 hours (using 64 cores), 44 hours (on regular PC, estimated assuming 8 cores).
+
+### Impact of vaccine uptake
+
+Run
+```bash
+python experiments/vaccine_acceptance_exp.py --config configs/vaccine-acceptance-exp.yml
+```
+which will save the results in `run/YYYY-MM-DD_HH-MM-SS.FFFFFF_acc_exp/`.
+The run can be analysed with the notebook`notebooks/uptake_experiment_analysis.ipynb`.
+Runtime: 13 hours (using 64 cores), 104 hours (on regular PC, estimated assuming 8 cores).
+
+### Simulating other disease types
+
+Run
+```bash
+python experiments/risk_profile_exp.py --config configs/risk-profile-exp.yml
+```
+which will save the results in `run/YYYY-MM-DD_HH-MM-SS.FFFFFF_risk_profile_exp/`.
+The run can be analysed with the notebook`notebooks/risk_profile_experiment_analysis.ipynb`.
+Runtime: 17 hours (using 64 cores), 136 hours (on regular PC, estimated assuming 8 cores).
+
+### Impact of immunity waning
+
+Run
+```bash
+python experiments/waning_exp.py --config configs/waning-exp.yml
+```
+which will save the results in `run/YYYY-MM-DD_HH-MM-SS.FFFFFF_waning_exp/`.
+The run can be analysed with the notebook`notebooks/waning_experiment_analysis.ipynb`.
+Runtime: 11 hours (using 64 cores), 88 hours (on regular PC, estimated assuming 8 cores).
+
+## Run output files
 
 ```bash
 run_output_directory
