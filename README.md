@@ -1,4 +1,7 @@
-# covid-vaccine-evaluation
+# Evaluating counterfactual vaccine allocation strategies using simulation-assisted causal modelling
+
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 ## Installation
 
@@ -35,6 +38,30 @@ jupytext data_preprocessing/*.py --to .ipynb
 ```
 
 The entire installation process can take up to 2 hours, mostly depending on how fast the data can be downloaded.
+
+The `requirements.txt` file contains all the required packages without pinned versions.
+One tested set of versions is (including requirements of the submodule):
+```
+arviz==0.12.1
+cachetools==4.2.4
+CairoSVG==2.5.2
+ConfigArgParse==1.5.3
+covid19-inference==0.3.6
+filelock==3.8.0
+jupytext==1.14.1
+matplotlib==3.5.3
+notebook==6.4.12
+numpy==1.21.6 
+numpyro==0.10.1
+pandas==1.4.4
+pymc3==3.11.2
+pytest==7.1.3
+requests==2.28.1
+statsmodels==0.13.2
+tabulate==0.8.10
+tqdm==4.64.1
+xarray==0.19.0
+```
 
 ## Data preparation
 
@@ -84,7 +111,7 @@ To reproduce the results for the different vaccine allocation strategies run
 ```bash
 python experiments/policy_exp.py --config configs/policy-exp.yml
 ```
-which will save the results in `run/YYYY-MM-DD_HH-MM-SS.FFFFFF_policy_exp/`.
+which saves the results in `run/YYYY-MM-DD_HH-MM-SS.FFFFFF_policy_exp/`.
 The run can be analysed with the notebook`notebooks/va_strategy_experiment_analysis.ipynb`.
 Runtime: 5.5 hours (using 64 cores), 44 hours (on regular PC, estimated assuming 8 cores).
 
@@ -94,7 +121,7 @@ Run
 ```bash
 python experiments/vaccine_acceptance_exp.py --config configs/vaccine-acceptance-exp.yml
 ```
-which will save the results in `run/YYYY-MM-DD_HH-MM-SS.FFFFFF_acc_exp/`.
+which saves the results in `run/YYYY-MM-DD_HH-MM-SS.FFFFFF_acc_exp/`.
 The run can be analysed with the notebook`notebooks/uptake_experiment_analysis.ipynb`.
 Runtime: 13 hours (using 64 cores), 104 hours (on regular PC, estimated assuming 8 cores).
 
@@ -104,7 +131,7 @@ Run
 ```bash
 python experiments/risk_profile_exp.py --config configs/risk-profile-exp.yml
 ```
-which will save the results in `run/YYYY-MM-DD_HH-MM-SS.FFFFFF_risk_profile_exp/`.
+which saves the results in `run/YYYY-MM-DD_HH-MM-SS.FFFFFF_risk_profile_exp/`.
 The run can be analysed with the notebook`notebooks/risk_profile_experiment_analysis.ipynb`.
 Runtime: 17 hours (using 64 cores), 136 hours (on regular PC, estimated assuming 8 cores).
 
@@ -114,7 +141,7 @@ Run
 ```bash
 python experiments/waning_exp.py --config configs/waning-exp.yml
 ```
-which will save the results in `run/YYYY-MM-DD_HH-MM-SS.FFFFFF_waning_exp/`.
+which saves the results in `run/YYYY-MM-DD_HH-MM-SS.FFFFFF_waning_exp/`.
 The run can be analysed with the notebook`notebooks/waning_experiment_analysis.ipynb`.
 Runtime: 11 hours (using 64 cores), 88 hours (on regular PC, estimated assuming 8 cores).
 
