@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.6
+#       jupytext_version: 1.14.1
 #   kernelspec:
 #     display_name: causal-covid-analysis
 #     language: python
@@ -45,6 +45,8 @@ BIGGER_SIZE = 16
 
 PLOT_HEIGHT = 4.8
 PLOT_WIDTH = 6.4
+
+PLOT = False
 
 plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
 plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
@@ -95,44 +97,46 @@ def vaccine_efficacy_curve_naive(w):
 
 vaccine_efficacy_values_weeks
 
-plt.figure()
-w = np.arange(0, 30, dtype=int)
-plt.plot(w, vaccine_efficacy_curve_naive(w))
-plt.xlabel('weeks since second dose')
-plt.ylabel('vaccine efficacy vs. infection')
-plt.title('vaccine efficacy waning against infections')
-plt.show()
+if PLOT:
+    plt.figure()
+    w = np.arange(0, 30, dtype=int)
+    plt.plot(w, vaccine_efficacy_curve_naive(w))
+    plt.xlabel('weeks since second dose')
+    plt.ylabel('vaccine efficacy vs. infection')
+    plt.title('vaccine efficacy waning against infections')
+    plt.show()
 
-plt.figure()
-w = np.arange(0, 30, dtype=int)
-plt.plot(
-    w, 
-    (1 - vaccine_efficacy_curve_naive(w)) / (1 - vaccine_efficacy_curve_naive(0))
-)
-plt.xlabel('weeks since second dose')
-plt.ylabel('waning factor h(w)')
-plt.title('waning curve')
-plt.show()
+if PLOT:
+    plt.figure()
+    w = np.arange(0, 30, dtype=int)
+    plt.plot(
+        w, 
+        (1 - vaccine_efficacy_curve_naive(w)) / (1 - vaccine_efficacy_curve_naive(0))
+    )
+    plt.xlabel('weeks since second dose')
+    plt.ylabel('waning factor h(w)')
+    plt.title('waning curve')
+    plt.show()
 
-# +
-fig, axes = plt.subplots(2, 1, figsize=(6.4, 1.5*4.8), sharex=True)
-plt.subplots_adjust(hspace=0.4)
+if PLOT:
+    fig, axes = plt.subplots(2, 1, figsize=(6.4, 1.5*4.8), sharex=True)
+    plt.subplots_adjust(hspace=0.4)
 
-w = np.arange(0, 30, dtype=int)
+    w = np.arange(0, 30, dtype=int)
 
-axes[0].plot(w, vaccine_efficacy_curve_naive(w))
-axes[0].set_ylabel('VE(w)')
-axes[0].set_title('vaccine efficacy')
+    axes[0].plot(w, vaccine_efficacy_curve_naive(w))
+    axes[0].set_ylabel('VE(w)')
+    axes[0].set_title('vaccine efficacy')
 
-axes[1].plot(
-    w, 
-    (1 - vaccine_efficacy_curve_naive(w)) / (1 - vaccine_efficacy_curve_naive(0))
-)
-axes[1].set_xlabel('weeks since second dose')
-axes[1].set_ylabel('h(w)')
-axes[1].set_title('waning function')
+    axes[1].plot(
+        w, 
+        (1 - vaccine_efficacy_curve_naive(w)) / (1 - vaccine_efficacy_curve_naive(0))
+    )
+    axes[1].set_xlabel('weeks since second dose')
+    axes[1].set_ylabel('h(w)')
+    axes[1].set_title('waning function')
 
-plt.show()
+    plt.show()
 
 
 # +
@@ -145,7 +149,7 @@ x = np.array([x_min] + list(np.arange(6) + 0.5) + [x_max])
 y = np.array(list(vaccine_efficacy_values_months) + [0])
 x = np.array(list(np.arange(6) + 0.5) + [x_max])
 
-print(f"x: {x}, y: {y}")
+if PLOT: print(f"x: {x}, y: {y}")
 
 def f_ve(x, a, b, c, d):
     return (a / (1. + np.exp(-c * (x - d)))) + b
@@ -155,18 +159,18 @@ popt, pcov = opt.curve_fit(f_ve, x, y, method="trf")
 x_fit = np.linspace(x_min, x_max, num=100)
 y_fit = f_ve(x_fit, *popt)
 
-print(f"a = {popt[0]}, b = {popt[1]}, c = {popt[2]}, d = {popt[3]}")
+if PLOT: print(f"a = {popt[0]}, b = {popt[1]}, c = {popt[2]}, d = {popt[3]}")
 
-
-plt.figure(figsize=(6.4, 4.8))
-plt.plot(x, y, '.', label='data')
-plt.plot(x_fit, y_fit, '-', label='logistic fit')
-plt.ylabel("vaccine efficacy vs. infection")
-plt.xlabel("months since second shot")
-plt.grid()
-plt.legend()
-# plt.savefig('figs/waning_curve_fit.png', dpi=200, bbox_inches='tight')
-plt.show()
+if PLOT:
+    plt.figure(figsize=(6.4, 4.8))
+    plt.plot(x, y, '.', label='data')
+    plt.plot(x_fit, y_fit, '-', label='logistic fit')
+    plt.ylabel("vaccine efficacy vs. infection")
+    plt.xlabel("months since second shot")
+    plt.grid()
+    plt.legend()
+    # plt.savefig('figs/waning_curve_fit.png', dpi=200, bbox_inches='tight')
+    plt.show()
 
 def vaccine_efficacy_curve_fit(w):
     week_to_month_factor = 365 / (12 * 7)
@@ -176,37 +180,38 @@ def vaccine_efficacy_curve_fit(w):
 
 # -
 
-plt.figure()
-# plt.plot(x, (1-y)/(1-y[0]), '.', label='data')
-plt.plot(x_fit, (1 - y_fit)/(1-y_fit[0]), '-', label='fit', c='#ff7f0e')
-plt.ylabel("waning factor")
-plt.xlabel("months since second shot")
-plt.grid()
-plt.legend()
-plt.show()
+if PLOT:
+    plt.figure()
+    # plt.plot(x, (1-y)/(1-y[0]), '.', label='data')
+    plt.plot(x_fit, (1 - y_fit)/(1-y_fit[0]), '-', label='fit', c='#ff7f0e')
+    plt.ylabel("waning factor")
+    plt.xlabel("months since second shot")
+    plt.grid()
+    plt.legend()
+    plt.show()
 
-# +
-fig, axes = plt.subplots(1, 2, figsize=(2*PLOT_WIDTH, 1*PLOT_HEIGHT), sharex=False)
-plt.subplots_adjust(hspace=0.3, wspace=0.2)
-plt.suptitle('Waning curve fit')
+if PLOT:
+    fig, axes = plt.subplots(1, 2, figsize=(2*PLOT_WIDTH, 1*PLOT_HEIGHT), sharex=False)
+    plt.subplots_adjust(hspace=0.3, wspace=0.2)
+    plt.suptitle('Waning curve fit')
 
-df_tmp = df[df['Age_group'] == 'total']
-colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    df_tmp = df[df['Age_group'] == 'total']
+    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
-axes[0].plot(x, y, '.', label='data')
-axes[0].plot(x_fit, y_fit, '-', label='logistic fit')
-axes[0].set_ylabel("vaccine efficacy")
-axes[0].set_xlabel("months since second shot")
-axes[0].grid()
-axes[0].legend()
+    axes[0].plot(x, y, '.', label='data')
+    axes[0].plot(x_fit, y_fit, '-', label='logistic fit')
+    axes[0].set_ylabel("vaccine efficacy")
+    axes[0].set_xlabel("months since second shot")
+    axes[0].grid()
+    axes[0].legend()
 
-axes[1].plot(x_fit, (1 - y_fit)/(1-y_fit[0]), '-', label='fit', c='#ff7f0e')
-axes[1].set_ylabel("waning factor")
-axes[1].set_xlabel("months since second shot")
-axes[1].grid()
-axes[1].legend()
+    axes[1].plot(x_fit, (1 - y_fit)/(1-y_fit[0]), '-', label='fit', c='#ff7f0e')
+    axes[1].set_ylabel("waning factor")
+    axes[1].set_xlabel("months since second shot")
+    axes[1].grid()
+    axes[1].legend()
 
-plt.show()
+    plt.show()
 
 # +
 # fit waning curve fast
@@ -218,7 +223,7 @@ x = np.array([x_min] + list(np.arange(6) + 0.5) + [x_max])
 y = np.array(list(vaccine_efficacy_values_months) + [0])
 x = 0.75*np.array(list(np.arange(6) + 0.5) + [x_max])
 
-print(f"x: {x}, y: {y}")
+if PLOT: print(f"x: {x}, y: {y}")
 
 def f_ve(x, a, b, c, d):
     return (a / (1. + np.exp(-c * (x - d)))) + b
@@ -228,18 +233,18 @@ popt_fast, pcov_fast = opt.curve_fit(f_ve, x, y, method="trf")
 x_fit = np.linspace(x_min, x_max, num=100)
 y_fit = f_ve(x_fit, *popt_fast)
 
-print(f"a = {popt_fast[0]}, b = {popt_fast[1]}, c = {popt_fast[2]}, d = {popt_fast[3]}")
+if PLOT: print(f"a = {popt_fast[0]}, b = {popt_fast[1]}, c = {popt_fast[2]}, d = {popt_fast[3]}")
 
-
-plt.figure(figsize=(6.4, 4.8))
-plt.plot(x, y, '.', label='data')
-plt.plot(x_fit, y_fit, '-', label='logistic fit')
-plt.ylabel("vaccine efficacy vs. infection")
-plt.xlabel("months since second shot")
-plt.grid()
-plt.legend()
-# plt.savefig('figs/waning_curve_fit_fast.png', dpi=200, bbox_inches='tight')
-plt.show()
+if PLOT:
+    plt.figure(figsize=(6.4, 4.8))
+    plt.plot(x, y, '.', label='data')
+    plt.plot(x_fit, y_fit, '-', label='logistic fit')
+    plt.ylabel("vaccine efficacy vs. infection")
+    plt.xlabel("months since second shot")
+    plt.grid()
+    plt.legend()
+    # plt.savefig('figs/waning_curve_fit_fast.png', dpi=200, bbox_inches='tight')
+    plt.show()
 
 def vaccine_efficacy_curve_fit_fast(w):
     week_to_month_factor = 365 / (12 * 7)
@@ -1202,17 +1207,17 @@ df_no_wc = collect_output(df_no_wc, df_f_no_wc)
 df_no_wc.head()
 # -
 
-plot_risk_factors(df_g_no_wc)
+if PLOT: plot_risk_factors(df_g_no_wc)
 
 compute_reconstruction_error(df_no_wc)
 
-plot_residuals(df_no_wc)
+if PLOT: plot_residuals(df_no_wc)
 
-plot_residual_means(df_no_wc)
+if PLOT: plot_residual_means(df_no_wc)
 
-plot_reconstruction(df_no_wc)
+if PLOT: plot_reconstruction(df_no_wc)
 
-plot_reconstruction2(df_no_wc)
+if PLOT: plot_reconstruction2(df_no_wc)
 
 # ## With Naive Waning Correction
 
@@ -1252,15 +1257,15 @@ df_wc.head()
 metrics = compute_reconstruction_error(df_wc)
 metrics
 
-plot_risk_factors(df_g_wc)
+if PLOT: plot_risk_factors(df_g_wc)
 
-plot_residuals(df_wc)
+if PLOT: plot_residuals(df_wc)
 
-plot_residual_means(df_wc)
+if PLOT: plot_residual_means(df_wc)
 
-plot_reconstruction2(df_wc)
+if PLOT: plot_reconstruction2(df_wc)
 
-plot_reconstruction(df_wc)
+if PLOT: plot_reconstruction(df_wc)
 
 dir_name = Path("initial-factorisation")
 path = OUTPUT_DATA_DIR / dir_name
@@ -1326,15 +1331,15 @@ metrics
  'bias2': -0.09501704708533106,
  'bias3': 0.02792538220921726}
 
-plot_risk_factors(df_g_wc_fit)
+if PLOT: plot_risk_factors(df_g_wc_fit)
 
-plot_residuals(df_wc_fit)
+if PLOT: plot_residuals(df_wc_fit)
 
-plot_residual_means(df_wc_fit)
+if PLOT: plot_residual_means(df_wc_fit)
 
-plot_reconstruction2(df_wc_fit)
+if PLOT: plot_reconstruction2(df_wc_fit)
 
-plot_reconstruction(df_wc_fit)
+if PLOT: plot_reconstruction(df_wc_fit)
 
 
 # + code_folding=[0]
@@ -1430,7 +1435,7 @@ def plot():
 #     plt.savefig('figs/reconstruction_and_waning_fit.png', dpi=200, bbox_inches='tight')
     plt.show()
 
-plot()
+if PLOT: plot()
 
 # +
 dir_name = Path("factorisation-with-fit")
@@ -1467,6 +1472,3 @@ save_vaccination_data(df, path)
 save_observed_severity_data(df, path)
 save_observed_infection_data(df, path)
 save_vaccine_acceptance_data(df, path)
-# -
-
-
