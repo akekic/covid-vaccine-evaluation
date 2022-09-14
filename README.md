@@ -3,6 +3,8 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
+![Methods diagram](methods_diagram.png)
+
 ## Installation
 
 The infection dynamics simulation code is included as a submodule. Clone this repository and initialize submodules with
