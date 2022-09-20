@@ -118,7 +118,7 @@ df_input = pd.read_pickle(INPUT_DATA_DIR_PATH)
 
 # ## 3. Plots
 
-# + code_folding=[0, 82, 141]
+# + code_folding=[]
 def plot(save=False):
     LW_LOCAL = 0.8
     labelrotation = 45
@@ -201,6 +201,8 @@ def plot(save=False):
 
     # infections second wave
     no_infections = {}
+    no_infections_err_low = {}
+    no_infections_err_high = {}
     for policy_name, policy_label in POLICY_NAME_MAP.items():
         if policy_name not in RUNS.keys():
             continue
@@ -680,7 +682,7 @@ run_name = "test"
 print_R2(run=run, run_name=run_name, save=SAVE_PLOTS)
 
 
-# + code_folding=[0]
+# + code_folding=[]
 def plot(save=False):
     LW_LOCAL = 0.8
     labelrotation = 45
@@ -732,21 +734,28 @@ def plot(save=False):
             continue
         run = RUNS[policy_name]
         population = run["D_a"].sum()
-        infection_dynamics_df = run["infection_dynamics_df"]
-        infection_dynamics_df["Sunday_date"] = pd.to_datetime(
-            infection_dynamics_df["Sunday_date"]
-        )
-        infection_dynamics_df = infection_dynamics_df[
-            infection_dynamics_df["Sunday_date"] < END_FIRST_WAVE
-        ]
-        infection_dynamics_df = infection_dynamics_df[
-            infection_dynamics_df["Age_group"] == "total"
-        ]
-        no_infections[policy_label] = (
-            infection_dynamics_df["total_infections_scenario"].sum()
-            * 1e5
-            / (population)
-        )
+        if policy_name == "observed":
+            no_infections[
+                TWO_LINE_NAME_MAP[policy_name]
+            ] = infection_incidence_observed(
+                df_input=df_input,
+                population=population,
+                split_date_to=END_FIRST_WAVE,
+            )
+        else:
+            a = np.array(
+                [
+                    infection_incidence(
+                        infection_dynamics_sample=inf_sample,
+                        population=population,
+                        week_dates=run["week_dates"],
+                        split_date_to=END_FIRST_WAVE,
+                    )
+                    for inf_sample in run["infection_dynamics_samples"]
+                ]
+            )
+
+            no_infections[TWO_LINE_NAME_MAP[policy_name]] = a.mean()
     df = pd.DataFrame.from_dict(no_infections, orient="index")
     axes[0, 0].bar(
         df.index, df[0], color=plt.rcParams["axes.prop_cycle"].by_key()["color"]
@@ -762,20 +771,36 @@ def plot(save=False):
             continue
         run = RUNS[policy_name]
         population = run["D_a"].sum()
-        infection_dynamics_df = run["infection_dynamics_df"]
-        infection_dynamics_df["Sunday_date"] = pd.to_datetime(
-            infection_dynamics_df["Sunday_date"]
-        )
-        infection_dynamics_df = infection_dynamics_df[
-            (infection_dynamics_df["Sunday_date"] >= START_SECOND_WAVE)
-            & (infection_dynamics_df["Sunday_date"] < END_SECOND_WAVE)
-        ]
-        infection_dynamics_df = infection_dynamics_df[
-            infection_dynamics_df["Age_group"] == "total"
-        ]
-        no_infections[policy_label] = (
-            infection_dynamics_df["total_infections_scenario"].sum() * 1e5 / population
-        )
+
+        if policy_name not in RUNS.keys():
+            continue
+        run = RUNS[policy_name]
+        population = run["D_a"].sum()
+        if policy_name == "observed":
+            no_infections[
+                TWO_LINE_NAME_MAP[policy_name]
+            ] = infection_incidence_observed(
+                df_input=df_input,
+                population=population,
+                split_date_from=START_SECOND_WAVE,
+                end_date=END_SECOND_WAVE,
+            )
+        else:
+            a = np.array(
+                [
+                    infection_incidence(
+                        infection_dynamics_sample=inf_sample,
+                        population=population,
+                        week_dates=run["week_dates"],
+                        split_date_from=START_SECOND_WAVE,
+                        end_date=END_SECOND_WAVE,
+                    )
+                    for inf_sample in run["infection_dynamics_samples"]
+                ]
+            )
+
+            no_infections[TWO_LINE_NAME_MAP[policy_name]] = a.mean()
+
     df = pd.DataFrame.from_dict(no_infections, orient="index")
     axes[0, 1].bar(
         df.index,
@@ -796,14 +821,30 @@ def plot(save=False):
         if policy_name not in RUNS.keys():
             continue
         run = RUNS[policy_name]
-        split_date_index = np.argwhere(
-            run["week_dates"] == END_FIRST_WAVE
-        ).flatten()[0]
         population = run["D_a"].sum()
-        n_weeks = len(run["weeks"])
-        no_severe_cases[TWO_LINE_NAME_MAP[policy_name]] = (
-            n_weeks * run["result"][:split_date_index, ...].sum() * 1e5
-        )
+
+        if policy_name == "observed":
+            no_severe_cases[
+                TWO_LINE_NAME_MAP[policy_name]
+            ] = severe_case_incidence_observed(
+                df_input=df_input,
+                population=population,
+                split_date_to=END_FIRST_WAVE,
+            )
+        else:
+            a = np.array(
+                [
+                    severe_case_incidence(
+                        res,
+                        len(run["weeks"]),
+                        run["week_dates"],
+                        split_date_to=END_FIRST_WAVE,
+                    )
+                    for res in run["result_samples"]
+                ]
+            )
+            no_severe_cases[TWO_LINE_NAME_MAP[policy_name]] = a.mean()
+
     df = pd.DataFrame.from_dict(no_severe_cases, orient="index")
     axes[1, 0].bar(
         df.index, df[0], color=plt.rcParams["axes.prop_cycle"].by_key()["color"]
@@ -818,17 +859,31 @@ def plot(save=False):
         if policy_name not in RUNS.keys():
             continue
         run = RUNS[policy_name]
-        split_date_index = np.argwhere(
-            run["week_dates"] == START_SECOND_WAVE
-        ).flatten()[0]
-        end_date_index = np.argwhere(run["week_dates"] == END_SECOND_WAVE).flatten()[
-            0
-        ]
         population = run["D_a"].sum()
-        n_weeks = len(run["weeks"])
-        no_severe_cases[TWO_LINE_NAME_MAP[policy_name]] = (
-            n_weeks * run["result"][split_date_index:end_date_index, ...].sum() * 1e5
-        )
+        if policy_name == "observed":
+            no_severe_cases[
+                TWO_LINE_NAME_MAP[policy_name]
+            ] = severe_case_incidence_observed(
+                df_input=df_input,
+                population=population,
+                split_date_from=START_SECOND_WAVE,
+                end_date=END_SECOND_WAVE,
+            )
+        else:
+            a = np.array(
+                [
+                    severe_case_incidence(
+                        res,
+                        len(run["weeks"]),
+                        run["week_dates"],
+                        split_date_from=START_SECOND_WAVE,
+                        end_date=END_SECOND_WAVE,
+                    )
+                    for res in run["result_samples"]
+                ]
+            )
+            no_severe_cases[TWO_LINE_NAME_MAP[policy_name]] = a.mean()
+
     df = pd.DataFrame.from_dict(no_severe_cases, orient="index")
     axes[1, 1].bar(
         df.index, df[0], color=plt.rcParams["axes.prop_cycle"].by_key()["color"]

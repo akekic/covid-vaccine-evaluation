@@ -109,7 +109,7 @@ RUNS.keys()
 
 # ## 3. Plots
 
-# + code_folding=[0]
+# + code_folding=[]
 def plot(save):
     fig = plt.figure(
         tight_layout=True,
@@ -326,7 +326,7 @@ def plot(save):
 plot(save=SAVE_PLOTS)
 
 
-# + code_folding=[0]
+# + code_folding=[]
 def plot(save):
     fig = plt.figure(
         tight_layout=True,
