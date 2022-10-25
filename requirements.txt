@@ -1,5 +1,5 @@
 ConfigArgParse
-numpy
+numpy==1.21
 tqdm
 pandas
 notebook
