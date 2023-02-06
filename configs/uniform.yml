@@ -1,4 +1,4 @@
 vaccination-policy: uniform
 input-dir: "data/factorisation-with-fit"
-load-correction-factor: true
+generate-correction-factors: true
 save-output: true

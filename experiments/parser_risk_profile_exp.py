@@ -6,7 +6,7 @@ import configargparse
 
 def maybe_str_or_float(arg):
     try:
-        return float(arg)  # try convert to int
+        return float(arg)  # try convert to float
     except ValueError:
         pass
     if arg == "observed" or arg == "observed_relaxed":
@@ -67,9 +67,9 @@ def create_parser():
         help="vaccine acceptance rate to assume for vaccination policies",
     )
     parser.add_argument(
-        "--load-correction-factor",
+        "--generate-correction-factors",
         action="store_true",
-        help="load infection dynamics correction factor",
+        help="generate infection dynamics correction factor (otherwise assume correction_factor=1 for age groups and time steps)",
     )
     parser.add_argument(
         "--start-week",

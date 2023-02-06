@@ -1,6 +1,6 @@
 input-dir: "data/factorisation-with-fit"
 acceptance-rate-delta: [0.0, 0.6]
-load-correction-factor: true
+generate-correction-factors: true
 save-output: true
 C-mat-param: 80
 V1-eff: 70

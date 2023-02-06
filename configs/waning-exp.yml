@@ -1,6 +1,6 @@
 input-dir: [data/waning-experiment/regular-waning,data/waning-experiment/fast-waning,data/waning-experiment/no-waning]
 vaccination-policy: [observed,elderly_first,young_first,uniform]
-load-correction-factor: true
+generate-correction-factors: true
 save-output: true
 samples: 1000
 workers: 64

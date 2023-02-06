@@ -74,7 +74,7 @@ def run_simulation(params, args, ppt_acceptance_change, run_dir):
     vaccination_policy = vaccination_policy_generator.generate()
     severity_factorisation = SeverityFactorisation(
         factorisation_data_dir,
-        load_correction_factor=args.load_correction_factor,
+        generate_correction_factors=args.generate_correction_factors,
         vaccination_policy=vaccination_policy,
         observed_vaccination_policy=ObservedVaccinationPolicyGenerator(
             params
@@ -153,9 +153,9 @@ if __name__ == "__main__":
         help="vaccination states with waning immunity",
     )
     parser.add_argument(
-        "--load-correction-factor",
+        "--generate-correction-factors",
         action="store_true",
-        help="load infection dynamics correction factor",
+        help="generate infection dynamics correction factor (otherwise assume correction_factor=1 for age groups and time steps)",
     )
     parser.add_argument(
         "--acceptance-rate-delta",

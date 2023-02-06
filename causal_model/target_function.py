@@ -16,6 +16,12 @@ logger = logging.getLogger(__name__)
 
 
 class TargetFunction:
+    """
+    This class contains the core of the target function computation.
+
+    The target function is the expected number of severe cases in the population for a given
+    vaccine allocation policy.
+    """
     subdir_name = "target_function"
 
     def __init__(
@@ -24,6 +30,17 @@ class TargetFunction:
         severity_factorisation: SeverityFactorisation,
         waning_states: Optional[list[int]] = None,
     ) -> None:
+        """
+        Parameters
+        ----------
+        params : Parameters
+            General parameters of the simulation.
+        severity_factorisation : SeverityFactorisation
+            Factors making up the severity mechanism. Also contains the infection dynamics simulation.
+        waning_states : list[int], optional
+            List of vaccination states for which waning is considered, by default we only consider waning after
+            the second vaccination.
+        """
         self.waning_states = (
             [
                 2,
@@ -43,6 +60,18 @@ class TargetFunction:
         self.observed_severity = params.observed_severity
 
     def waning_function(self, t, vac_time, vac_state):
+        """
+        Waning function for the vaccine efficacy.
+
+        Parameters
+        ----------
+        t : int
+            Time step (week index).
+        vac_time : int
+            Time step (week index) of the vaccination.
+        vac_state : int
+            Vaccination state of the individual (0, 1, 2 or 3).
+        """
         if vac_state in self.waning_states:
             x = t - vac_time
             if vac_state == 1:
@@ -80,6 +109,32 @@ class TargetFunction:
         *args,
         **kwargs,
     ) -> tuple[np.ndarray, np.ndarray]:
+        """
+        Compute the target function for a given vaccination policy.
+
+        Parameters
+        ----------
+        vaccination_policy : VaccinationPolicy
+            Vaccination policy to evaluate.
+        ignore_infection_dynamics : bool, optional
+            If True, the infection dynamics are not simulated and we assume the correction factor is 1
+            for all age groups and time steps, by default False.
+        n_samples : int, optional
+            Number of samples to take from the infection dynamics simulation, by default 0
+            (only compute the mean estimate).
+        n_workers : int, optional
+            Number of workers to use. The target function is computed for each sample of the infection dynamics.
+            This computation is parallelised over the samples, by default 1.
+
+        Returns
+        -------
+        s_t_a_v : np.ndarray
+            Number of severe cases for each age group, time step and vaccination state (mean estimate).
+        s_t_a_v_samples : np.ndarray
+            Number of severe cases for each age group, time step and vaccination state
+            (for each sample of the infection dynamics simulation).
+
+        """
         if ignore_infection_dynamics:
             logger.info("Computing target function with ignored infection dynamics ...")
         else:
@@ -157,6 +212,41 @@ class TargetFunction:
         population: float,
         waning_function: Callable,
     ) -> np.ndarray:
+        """
+        Compute the target function for a given vaccination policy and infection dynamics sample.
+
+        Parameters
+        ----------
+        weeks_scenario : np.ndarray
+            Time steps of the scenario.
+        age_groups : np.ndarray
+            Age groups of the scenario.
+        vaccination_statuses : np.ndarray
+            One week longer than weeks_scenario.
+        weeks_scenario_extended : np.ndarray
+            Time steps of the extended scenario.
+        U_2 : np.ndarray
+            Parametrisation of the vaccination policy (first and second doses).
+        u_3 : np.ndarray
+            Parametrisation of the vaccination policy (third dose).
+        g : np.ndarray
+            Risk factors g(V, A) of the severity factorisation.
+        P_t : float
+            Probability of a given time, typically 1/ number of time steps.
+        f_0 : np.ndarray
+            Overall time dependence f_0(T) of the severity factorisation.
+        f_1 : np.ndarray
+            Infection dynamics correction factor f_1(A, T) of the severity factorisation.
+        population : float
+            Population size.
+        waning_function : Callable
+            Waning function.
+
+        Returns
+        -------
+        s_t_a_v : np.ndarray
+            Number of severe cases for each age group, time step and vaccination state.
+        """
         s_t_a_v = np.zeros(
             (
                 len(weeks_scenario),

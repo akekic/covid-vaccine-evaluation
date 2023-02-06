@@ -91,9 +91,9 @@ if __name__ == "__main__":
         help="vaccine acceptance rate to assume for vaccination policies",
     )
     parser.add_argument(
-        "--load-correction-factor",
+        "--generate-correction-factors",
         action="store_true",
-        help="load infection dynamics correction factor",
+        help="generate infection dynamics correction factor (otherwise assume correction_factor=1 for age groups and time steps)",
     )
     parser.add_argument(
         "--start-week",
@@ -206,7 +206,7 @@ if __name__ == "__main__":
             vaccine_acceptance_rate=args.vaccine_acceptance_rate,
             constraints_per_dose=True,
             severity_factorisation=SeverityFactorisation(
-                factorisation_data_dir, load_correction_factor=False
+                factorisation_data_dir, generate_correction_factors=False
             ),
         ),
         "risk_ranked_reversed": RankedVaccinationPolicyGenerator(
@@ -215,7 +215,7 @@ if __name__ == "__main__":
             vaccine_acceptance_rate=args.vaccine_acceptance_rate,
             constraints_per_dose=True,
             severity_factorisation=SeverityFactorisation(
-                factorisation_data_dir, load_correction_factor=False
+                factorisation_data_dir, generate_correction_factors=False
             ),
         ),
     }
@@ -232,7 +232,7 @@ if __name__ == "__main__":
 
         severity_factorisation = SeverityFactorisation(
             factorisation_data_dir,
-            load_correction_factor=args.load_correction_factor,
+            generate_correction_factors=args.generate_correction_factors,
             vaccination_policy=vaccination_policy,
             observed_vaccination_policy=vaccination_policy_generator_map[
                 "observed"

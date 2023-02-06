@@ -69,9 +69,9 @@ if __name__ == "__main__":
         help="vaccination states with waning immunity",
     )
     parser.add_argument(
-        "--load-correction-factor",
+        "--generate-correction-factors",
         action="store_true",
-        help="load infection dynamics correction factor",
+        help="generate infection dynamics correction factor (otherwise assume correction_factor=1 for age groups and time steps)",
     )
     parser.add_argument(
         "--start-week",
@@ -183,7 +183,7 @@ if __name__ == "__main__":
 
     severity_factorisation = SeverityFactorisation(
         factorisation_data_dir=factorisation_data_dir,
-        load_correction_factor=args.load_correction_factor,
+        generate_correction_factors=args.generate_correction_factors,
         vaccination_policy=vaccination_policy,
         observed_vaccination_policy=vaccination_policy_generator_map[
             "observed"

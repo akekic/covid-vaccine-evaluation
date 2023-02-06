@@ -26,12 +26,25 @@ AGE_GROUP_NAMES = [
 
 
 class SeverityFactorisation:
+    """
+    This class contains the factors that make up the severity mechanism, i.e.
+
+    P(S=1 | V, A, T, W) = h^V(W) * f_0(T) * g(V, A) * f_1(A, T)
+
+    where h^V(W) is the vaccine efficacy waning function, f_0(T) is the time dependence,
+    g(V, A) is the risk factor, and f_1(A, T) is the age and time dependent correction factor
+    accounting for changes in the infection probability over time.
+
+    The class also contains the infection dynamics simulation, which is used to generate
+    the f_1(A, T) correction factors.
+    """
+
     subdir_name = "severity_factorisation"
 
     def __init__(
         self,
         factorisation_data_dir: Path,
-        load_correction_factor: bool,
+        generate_correction_factors: bool,
         vaccination_policy: Optional[VaccinationPolicy] = None,
         observed_vaccination_policy: Optional[ObservedVaccinationPolicy] = None,
         C_mat_param: Optional[int] = None,
@@ -43,11 +56,40 @@ class SeverityFactorisation:
         waning_path: Optional[Path] = None,
         baseline_from_observations: bool = False,
     ) -> None:
+        """
+        Parameters
+        ----------
+        factorisation_data_dir : Path
+            The directory containing the base factors f_0 and g.
+        generate_correction_factors: bool
+            Whether to generate the correction factors from the infection dynamics simulation.
+            If False, dummy values (correction_factors = 1 for all age groups and times) are used.
+        vaccination_policy : Optional[VaccinationPolicy]
+            The vaccination policy to use for the infection dynamics simulation.
+        observed_vaccination_policy : Optional[ObservedVaccinationPolicy]
+            The observed vaccination policy to use for the infection dynamics simulation.
+        C_mat_param : Optional[int]
+            The C_mat parameter to use for the infection dynamics simulation.
+        V1_eff : int
+            The vaccine efficacy of the first dose.
+        V2_eff : int
+            The vaccine efficacy of the second dose.
+        V3_eff : int
+            The vaccine efficacy of the third dose.
+        draws : Optional[int]
+            The number of draws to use for the infection dynamics simulation.
+        influx : Optional[int]
+            The influx to use for the infection dynamics simulation.
+        waning_path : Optional[Path]
+            The path to the vaccine efficacy waning data.
+        baseline_from_observations : bool
+            Whether to use the observed vaccination policy for the infection dynamics simulation.
+        """
         self.path = factorisation_data_dir
         if waning_path is not None:
             logger.info(f"Alternative waning path {waning_path} is used.")
         self.waning_path = waning_path
-        self.load_correction_factor = load_correction_factor
+        self.generate_correction_factors = generate_correction_factors
         self.vaccination_policy = vaccination_policy
         self.C_mat_param = C_mat_param
         self.V1_eff = V1_eff
@@ -68,7 +110,7 @@ class SeverityFactorisation:
             self.median_weekly_eff_R_t,
         ) = self._generate_infection_dynamics_simulation(
             factorisation_data_dir,
-            generate_correction_factors=load_correction_factor,
+            generate_correction_factors=generate_correction_factors,
             vaccination_policy=vaccination_policy,
             observed_vaccination_policy=observed_vaccination_policy,
             baseline_from_observations=baseline_from_observations,
@@ -125,7 +167,8 @@ class SeverityFactorisation:
         factorisation_data_dir: Path
             Path to the factorisation data directory.
         generate_correction_factors: bool
-            Whether to generate the correction factors and reporoduction numbers. If False, dummy values are returned.
+            Whether to generate the correction factors from the infection dynamics simulation.
+            If False, dummy values (correction_factors = 1 for all age groups and times) are returned.
         vaccination_policy: Optional[VaccinationPolicy]
         observed_vaccination_policy: Optional[ObservedVaccinationPolicy]
         baseline_from_observations: bool
@@ -273,6 +316,7 @@ class SeverityFactorisation:
 
     @staticmethod
     def _add_total_infections(df: pd.DataFrame) -> pd.DataFrame:
+        """Add total infections column to dataframe."""
         df_observed_infection_total = pd.DataFrame(
             df.groupby("Sunday_date")["total_infections"].sum()
         ).reset_index()
@@ -293,6 +337,41 @@ class SeverityFactorisation:
         influx: int,
         waning_path: Optional[Path],
     ) -> tuple[pd.DataFrame, np.ndarray, np.ndarray, dict[str, np.ndarray]]:
+        """
+        Compute infection dynamics for a given vaccination policy.
+
+        Parameters
+        ----------
+
+        vaccination_policy: VaccinationPolicy
+            Vaccination policy to compute infection dynamics for.
+        C_mat_param: int
+            Mixing parameter for contact matrix (70, 80 or 90).
+        V1_eff: int
+            Efficacy of first dose of vaccine.
+        V2_eff: int
+            Efficacy of second dose of vaccine.
+        V3_eff: int
+            Efficacy of third dose of vaccine.
+        draws: int
+            Number of draws to used for infection dynamics training (typically 500).
+        influx: int
+            Number of influx cases to use for infection dynamics simulation (typically 0.5).
+        waning_path: Optional[Path]
+            Path to waning data.
+
+        Returns
+        -------
+
+        df_scenario_infection: pd.DataFrame
+            Dataframe containing infection dynamics results.
+        median_weekly_base_R_t: np.ndarray
+            Weekly base reproduction numbers.
+        median_weekly_eff_R_t: np.ndarray
+            Weekly effective reproduction numbers.
+        predictive_trace_scenario: dict[str, np.ndarray]
+            Predictive trace from infection dynamics model.
+        """
         (
             median_cases,
             predictive_trace,
@@ -308,6 +387,7 @@ class SeverityFactorisation:
             draws=draws,
             influx=influx,
             waning_path=waning_path,
+            compressed=True,
         )
         df_scenario_infection = (
             pd.DataFrame(
@@ -384,6 +464,7 @@ class SeverityFactorisation:
         draws: int,
         influx: int,
         waning_path: Optional[Path] = None,
+        compressed: bool = True,
     ):
         # wrapping the execution in ProcessPoolExecutor to avoid memory issues
         with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:
@@ -398,12 +479,14 @@ class SeverityFactorisation:
                 draws=draws,
                 influx=influx,
                 waning_file=waning_path,
+                compressed=compressed,
             )
         median_cases, predictive_trace, model, infectiability_df = future.result()
         return median_cases, predictive_trace, model, infectiability_df
 
     @staticmethod
     def _load_observed_infection_data(path: Path) -> pd.DataFrame:
+        """Load observed infection data from file."""
         df_observed_infection = pd.read_csv(
             path / "observed_infection_data.csv", parse_dates=["Sunday_date"]
         )
@@ -426,6 +509,7 @@ class SeverityFactorisation:
         return df_observed_infection
 
     def save(self, dir: Path) -> None:
+        """Save the results to a directory."""
         subdir = dir / self.subdir_name
         subdir.mkdir(parents=True, exist_ok=False)
         np.save(subdir / "f_0", self.f_0)
@@ -446,10 +530,14 @@ class SeverityFactorisation:
         np.save(subdir / "vaccine_efficacy_params", self.vaccine_efficacy_params)
 
     def _ve(self, x):
+        """Vaccine efficacy function."""
         return self.vaccine_efficacy_params[x]
 
     @staticmethod
     def _interpolate_missing_values(df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Interpolate missing values for the correction factor f_1(A, T) in the dataframe.
+        """
         for age_group in AGE_GROUP_NAMES:
             df.loc[df["Age_group"] == age_group, "f1"] = (
                 df.loc[df["Age_group"] == age_group, "f1"]
