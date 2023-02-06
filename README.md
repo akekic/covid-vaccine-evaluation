@@ -14,15 +14,7 @@ cd covid-vaccine-evaluation
 git submodule init
 git submodule update 
 ```
-The inferred parameters for the infection dynamics simulation is stored here. 
-Download the data and place it in the corresponding data folder with
-```bash
-cd covid-vaccine-dynamics/data/traces
-wget https://gin.g-node.org/jdehning/covid-vaccine-dynamics-data/raw/488d5b6235be00e37c872ced080af713cdf92d1d/traces/run-begin=2020-12-20-end=2021-12-19-C_mat=70-V1_eff=70-V2_eff=90-V3_eff=95-influx=0.5-draws=500.pkl
-wget https://gin.g-node.org/jdehning/covid-vaccine-dynamics-data/raw/488d5b6235be00e37c872ced080af713cdf92d1d/traces/run-begin=2020-12-20-end=2021-12-19-C_mat=80-V1_eff=70-V2_eff=90-V3_eff=95-influx=0.5-draws=500.pkl
-wget https://gin.g-node.org/jdehning/covid-vaccine-dynamics-data/raw/488d5b6235be00e37c872ced080af713cdf92d1d/traces/run-begin=2020-12-20-end=2021-12-19-C_mat=90-V1_eff=70-V2_eff=90-V3_eff=95-influx=0.5-draws=500.pkl
-cd ../../..
-``` 
+
 Install the submodule with
 ```bash
 pip install -e ./covid-vaccine-dynamics
@@ -38,8 +30,6 @@ Convert all notebook files into `.ipynb`
 jupytext notebooks/*.py --to .ipynb
 jupytext data_preprocessing/*.py --to .ipynb
 ```
-
-The entire installation process can take up to 2 hours, mostly depending on how fast the data can be downloaded.
 
 The `requirements.txt` file contains all the required packages without pinned versions.
 One tested set of versions is (including requirements of the submodule):
@@ -64,6 +54,38 @@ tabulate==0.8.10
 tqdm==4.64.1
 xarray==0.19.0
 ```
+
+### Download Infection Dynamics Traces
+
+The traces for the infection dynamics simulation need to be put in `covid-vaccine-dynamics/data/traces`.
+The full trace files are large and can take some time to download. 
+In order to quickly test the code base, you can download a smaller version of the trace files:
+
+#### Option 1 (quick): download small trace file for main contact matrix
+
+Download the small trace file (41 MB) for the main contact matrix (`C_mat=80`) and place it in the corresponding data folder with
+```bash
+cd covid-vaccine-dynamics/data/traces
+wget https://gin.g-node.org/jdehning/covid-vaccine-dynamics-data/raw/a88a6e8d25fbe895aa08ca55c3641b6f90fc656e/traces_small/run-begin=2020-12-20-end=2021-12-19-C_mat=80-V1_eff=70-V2_eff=90-V3_eff=95-influx=0.5-draws=500.zip
+cd ../../..
+``` 
+
+**Note:** the small trace file should only be used for testing purposes.
+The estimated uncertainties will be unreliable.
+The full trace files are required to reproduce the results shown in the paper.
+
+#### Option 2 (slow): download full trace files for all contact matrices
+
+Download the full trace files (5.1 GB in total) for all contact matrices (`C_mat=70`, `C_mat=80` and `C_mat=90`)  and place them in the corresponding data folder with
+```bash
+cd covid-vaccine-dynamics/data/traces
+wget https://gin.g-node.org/jdehning/covid-vaccine-dynamics-data/raw/a88a6e8d25fbe895aa08ca55c3641b6f90fc656e/traces/run-begin=2020-12-20-end=2021-12-19-C_mat=70-V1_eff=70-V2_eff=90-V3_eff=95-influx=0.5-draws=500.zip
+wget https://gin.g-node.org/jdehning/covid-vaccine-dynamics-data/raw/a88a6e8d25fbe895aa08ca55c3641b6f90fc656e/traces/run-begin=2020-12-20-end=2021-12-19-C_mat=80-V1_eff=70-V2_eff=90-V3_eff=95-influx=0.5-draws=500.zip
+wget https://gin.g-node.org/jdehning/covid-vaccine-dynamics-data/raw/a88a6e8d25fbe895aa08ca55c3641b6f90fc656e/traces/run-begin=2020-12-20-end=2021-12-19-C_mat=90-V1_eff=70-V2_eff=90-V3_eff=95-influx=0.5-draws=500.zip
+cd ../../..
+``` 
+
+The entire installation process can take up to 2 hours, mostly depending on how fast the data can be downloaded.
 
 ## Data preparation
 
