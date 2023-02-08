@@ -108,6 +108,7 @@ class SeverityFactorisation:
             self.infection_dynamics_samples,
             self.median_weekly_base_R_t,
             self.median_weekly_eff_R_t,
+            self.weekly_base_R_t_samples,
         ) = self._generate_infection_dynamics_simulation(
             factorisation_data_dir,
             generate_correction_factors=generate_correction_factors,
@@ -158,6 +159,7 @@ class SeverityFactorisation:
         np.ndarray,
         np.ndarray,
         np.ndarray,
+        np.ndarray,
     ]:
         """
         Generate the infection dynamics simulation.
@@ -187,6 +189,8 @@ class SeverityFactorisation:
             Base reproduction number. Shape: [t, age]
         median_weekly_eff_R_t: ndarray or None
             Effective reproduction number. Shape: [t, age]
+        weekly_base_R_t_samples: np.ndarray
+            Weekly base reproduction number samples. Shape: [samples, t, age]
         """
         if generate_correction_factors:
             assert (
@@ -212,6 +216,7 @@ class SeverityFactorisation:
                 df_scenario_infection,
                 median_weekly_base_R_t,
                 median_weekly_eff_R_t,
+                weekly_base_R_t_samples,
                 predictive_trace_scenario,
             ) = self._compute_scenario_infection_data(
                 vaccination_policy=vaccination_policy,
@@ -242,6 +247,7 @@ class SeverityFactorisation:
                 logger.info("Computing infection dynamics for observed policy ...")
                 (
                     df_observed_infection,
+                    _,
                     _,
                     _,
                     predictive_trace_observed,
@@ -302,6 +308,7 @@ class SeverityFactorisation:
             df_infection_dynamics = None
             median_weekly_base_R_t = None
             median_weekly_eff_R_t = None
+            weekly_base_R_t_samples = None
             correction_factors = np.ones((9, 53))  # TODO: get dimensions
             correction_factors_samples = np.ones((1000, 9, 53))  # TODO: get dimensions
             infection_dynamics_samples = np.zeros((1000, 9, 53))  # TODO: get dimensions
@@ -312,6 +319,7 @@ class SeverityFactorisation:
             infection_dynamics_samples,
             median_weekly_base_R_t,
             median_weekly_eff_R_t,
+            weekly_base_R_t_samples,
         )
 
     @staticmethod
@@ -336,7 +344,7 @@ class SeverityFactorisation:
         draws: int,
         influx: int,
         waning_path: Optional[Path],
-    ) -> tuple[pd.DataFrame, np.ndarray, np.ndarray, dict[str, np.ndarray]]:
+    ) -> tuple[pd.DataFrame, np.ndarray, np.ndarray, np.ndarray, dict[str, np.ndarray]]:
         """
         Compute infection dynamics for a given vaccination policy.
 
@@ -369,6 +377,8 @@ class SeverityFactorisation:
             Weekly base reproduction numbers.
         median_weekly_eff_R_t: np.ndarray
             Weekly effective reproduction numbers.
+        weekly_base_R_t_samples: np.ndarray
+            Weekly base reproduction number samples.
         predictive_trace_scenario: dict[str, np.ndarray]
             Predictive trace from infection dynamics model.
         """
@@ -443,6 +453,7 @@ class SeverityFactorisation:
         median_weekly_base_R_t = (transf_mat.T / 7) @ np.median(
             predictive_trace["base_R_t"], axis=0
         )
+        weekly_base_R_t_samples = (transf_mat.T / 7) @ predictive_trace["base_R_t"]
         median_weekly_eff_R_t = (transf_mat.T / 7) @ np.median(
             predictive_trace["eff_R_t"], axis=0
         )
@@ -450,6 +461,7 @@ class SeverityFactorisation:
             df_scenario_infection,
             median_weekly_base_R_t,
             median_weekly_eff_R_t,
+            weekly_base_R_t_samples,
             predictive_trace,
         )
 
@@ -524,6 +536,8 @@ class SeverityFactorisation:
             )
         if self.median_weekly_base_R_t is not None:
             np.save(subdir / "median_weekly_base_R_t", self.median_weekly_base_R_t)
+        if self.weekly_base_R_t_samples is not None:
+            np.save(subdir / "weekly_base_R_t_samples", self.weekly_base_R_t_samples)
         if self.median_weekly_base_R_t is not None:
             np.save(subdir / "median_weekly_eff_R_t", self.median_weekly_eff_R_t)
         np.save(subdir / "g", self.g)
