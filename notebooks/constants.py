@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.6
+#       jupytext_version: 1.14.4
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -23,8 +23,8 @@ from collections import OrderedDict
 from pathlib import Path
 
 mm = 1/(10 * 2.54)  # millimeters in inches
-SINGLE_COLUMN = 90 * mm
-DOUBLE_COLUMN = 180 * mm
+SINGLE_COLUMN = 85 * mm
+DOUBLE_COLUMN = 174 * mm
 PAGE_WIDTH = 8.25  # A4 width in inches
 PLOT_HEIGHT = 4.8
 PLOT_WIDTH = 6.4

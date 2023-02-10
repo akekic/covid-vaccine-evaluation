@@ -118,7 +118,7 @@ df_input = pd.read_pickle(INPUT_DATA_DIR_PATH)
 
 # ## 3. Plots
 
-# + code_folding=[0]
+# + code_folding=[]
 def plot(save=False):
     LW_LOCAL = 0.8
     labelrotation = 45
@@ -588,7 +588,7 @@ def print_R2(run, run_name, save=False):
     add_event(ax=axes[0], date=datetime.date(year=2021, month=3, day=7), y=2.2, text="d")
     add_event(ax=axes[0], date=datetime.date(year=2021, month=3, day=19), y=2.7, text="e")
     add_event(ax=axes[0], date=datetime.date(year=2021, month=6, day=1), y=1.1, text="f", down=False)
-    add_event(ax=axes[0], date=datetime.date(year=2021, month=6, day=20), y=1.1, text="g", down=False, dx_text=0)
+    add_event(ax=axes[0], date=datetime.date(year=2021, month=6, day=20), y=1.12, text="g", down=False, dx_text=0)
     add_event(ax=axes[0], date=datetime.date(year=2021, month=6, day=25), y=1.6, text="h", down=False, dx_text=8)
     add_event(ax=axes[0], date=datetime.date(year=2021, month=7, day=29), y=1.1, text="i", down=False)
     add_event(ax=axes[0], date=datetime.date(year=2021, month=8, day=31), y=2.5, text="j")
@@ -667,8 +667,11 @@ def print_R2(run, run_name, save=False):
         labels=l,
         ncol=5,
         loc="lower right",
-        bbox_to_anchor=(0.99, 1.0),
+        bbox_to_anchor=(0.985, 1.0),
         title="Age group",
+        handletextpad=0.6,
+#         labelspacing=0.4,
+        columnspacing=1.6,
     )
 
     if save:
@@ -682,7 +685,7 @@ run_name = "test"
 print_R2(run=run, run_name=run_name, save=SAVE_PLOTS)
 
 
-# + code_folding=[5]
+# + code_folding=[1, 5]
 def print_R2(run, run_name, save=False):
     def add_event(ax, date, y=3.0, text="hi", down=True, dx_text=0.0):
         if down:
@@ -724,6 +727,10 @@ def print_R2(run, run_name, save=False):
     axes = [ax]
 
     colors = AGE_COLORMAP(np.linspace(0.2, 1, len(run["age_group_names"])))
+    
+    if run["weekly_base_R_t_samples"] is None:
+        print("No base R_t samples found in run")
+        return 0
     
     err_low = np.percentile(run["weekly_base_R_t_samples"], 2.5, axis=0)
     err_high = np.percentile(run["weekly_base_R_t_samples"], 97.5, axis=0)
@@ -817,6 +824,9 @@ def print_R2(run, run_name, save=False):
         loc="lower right",
         bbox_to_anchor=(0.99, 1.0),
         title="Age group",
+        handletextpad=0.6,
+#         labelspacing=0.4,
+        columnspacing=1.6,
     )
 
     if save:
