@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class Parameters:
-    """Class to store parameters."""
+    """Class to store parameters of the simulation."""
     subdir_name = "parameters"
 
     def __init__(
@@ -21,6 +21,16 @@ class Parameters:
         start_week: Optional[datetime.date] = None,
         end_week: Optional[datetime.date] = None,
     ) -> None:
+        """
+        Parameters
+        ----------
+        path : Path
+            Path to the data directory. The parameters are inferred from the data in this directory.
+        start_week : Optional[datetime.date], optional
+            Sunday date of start week - format YYYY-MM-DD, by default None.
+        end_week : Optional[datetime.date], optional
+            Sunday date of end week - format YYYY-MM-DD, by default None.
+        """
         self.start_week = (
             np.datetime64(start_week)
             if start_week is not None
@@ -72,7 +82,9 @@ class Parameters:
 
     @staticmethod
     def _load_vaccination_data(path: Path) -> np.ndarray:
-        # TODO: check if weeks and ages are sorted in df
+        """
+        Load vaccination data from csv file.
+        """
         df_vac = pd.read_csv(path / "vaccination_data.csv")
         age_groups = df_vac["Age_group"].unique()
         weeks = df_vac["Sunday_date"].unique()
@@ -97,6 +109,9 @@ class Parameters:
 
     @staticmethod
     def _load_observed_severity_data(path: Path) -> np.ndarray:
+        """
+        Load observed severe case data from csv file.
+        """
         df_sev = pd.read_csv(path / "observed_severity_data.csv")
         age_groups = df_sev["Age_group"].unique()
         weeks = df_sev["Sunday_date"].unique()
@@ -125,6 +140,9 @@ class Parameters:
         return np.nan_to_num(observed_severity)
 
     def _load_vaccine_acceptance_rate(self, path: Path) -> np.ndarray:
+        """
+        Load vaccine acceptance rate from csv file.
+        """
         df_acc = pd.read_csv(path / "vaccine_acceptance_data.csv")
         return df_acc[
             [

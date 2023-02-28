@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.6
+#       jupytext_version: 1.14.4
 #   kernelspec:
 #     display_name: causal-covid-analysis
 #     language: python
@@ -116,6 +116,15 @@ def load_run(run_dir):
     except FileNotFoundError:
         print(f"Weekly base R_t data not found under {median_weekly_base_R_t_path}")
         run["median_weekly_base_R_t"] = None
+    
+    weekly_base_R_t_samples_path = (
+        run_dir / "severity_factorisation" / "weekly_base_R_t_samples.npy"
+    )
+    try:
+        run["weekly_base_R_t_samples"] = np.load(weekly_base_R_t_samples_path)
+    except FileNotFoundError:
+        print(f"Weekly base R_t samples data not found under {weekly_base_R_t_samples_path}")
+        run["weekly_base_R_t_samples"] = None
 
     median_weekly_eff_R_t_path = (
         run_dir / "severity_factorisation" / "median_weekly_eff_R_t.npy"

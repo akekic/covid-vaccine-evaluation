@@ -118,7 +118,7 @@ def normalisation_run(input_dir, args):
     policy = UniformVaccinationPolicyGenerator(params).generate()
     severity_factorisation = SeverityFactorisation(
         input_dir,
-        load_correction_factor=args.load_correction_factor,
+        generate_correction_factors=args.generate_correction_factors,
         vaccination_policy=policy,
         observed_vaccination_policy=ObservedVaccinationPolicyGenerator(
             params
@@ -256,7 +256,7 @@ if __name__ == "__main__":
                 vaccine_acceptance_rate=args.vaccine_acceptance_rate,
                 constraints_per_dose=True,
                 severity_factorisation=SeverityFactorisation(
-                    factorisation_data_dir, load_correction_factor=False
+                    factorisation_data_dir, generate_correction_factors=False
                 ),
             ),
             "risk_ranked_reversed": RankedVaccinationPolicyGenerator(
@@ -265,7 +265,7 @@ if __name__ == "__main__":
                 vaccine_acceptance_rate=args.vaccine_acceptance_rate,
                 constraints_per_dose=True,
                 severity_factorisation=SeverityFactorisation(
-                    factorisation_data_dir, load_correction_factor=False
+                    factorisation_data_dir, generate_correction_factors=False
                 ),
             ),
         }
@@ -281,7 +281,7 @@ if __name__ == "__main__":
 
         severity_factorisation = SeverityFactorisation(
             factorisation_data_dir,
-            load_correction_factor=args.load_correction_factor,
+            generate_correction_factors=args.generate_correction_factors,
             vaccination_policy=vaccination_policy,
             observed_vaccination_policy=ObservedVaccinationPolicyGenerator(
                 params

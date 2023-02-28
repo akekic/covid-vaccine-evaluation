@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.6
+#       jupytext_version: 1.14.4
 #   kernelspec:
 #     display_name: causal-covid-analysis
 #     language: python
@@ -526,7 +526,7 @@ def plot(save=False):
 plot(save=SAVE_PLOTS)
 
 
-# + code_folding=[0]
+# + code_folding=[]
 def print_R2(run, run_name, save=False):
     def add_event(ax, date, y=3.0, text="hi", down=True, dx_text=0.0):
         if down:
@@ -588,7 +588,7 @@ def print_R2(run, run_name, save=False):
     add_event(ax=axes[0], date=datetime.date(year=2021, month=3, day=7), y=2.2, text="d")
     add_event(ax=axes[0], date=datetime.date(year=2021, month=3, day=19), y=2.7, text="e")
     add_event(ax=axes[0], date=datetime.date(year=2021, month=6, day=1), y=1.1, text="f", down=False)
-    add_event(ax=axes[0], date=datetime.date(year=2021, month=6, day=20), y=1.1, text="g", down=False, dx_text=0)
+    add_event(ax=axes[0], date=datetime.date(year=2021, month=6, day=20), y=1.12, text="g", down=False, dx_text=0)
     add_event(ax=axes[0], date=datetime.date(year=2021, month=6, day=25), y=1.6, text="h", down=False, dx_text=8)
     add_event(ax=axes[0], date=datetime.date(year=2021, month=7, day=29), y=1.1, text="i", down=False)
     add_event(ax=axes[0], date=datetime.date(year=2021, month=8, day=31), y=2.5, text="j")
@@ -667,8 +667,11 @@ def print_R2(run, run_name, save=False):
         labels=l,
         ncol=5,
         loc="lower right",
-        bbox_to_anchor=(0.99, 1.0),
+        bbox_to_anchor=(0.985, 1.0),
         title="Age group",
+        handletextpad=0.6,
+#         labelspacing=0.4,
+        columnspacing=1.6,
     )
 
     if save:
@@ -682,7 +685,162 @@ run_name = "test"
 print_R2(run=run, run_name=run_name, save=SAVE_PLOTS)
 
 
-# + code_folding=[]
+# + code_folding=[1, 5]
+def print_R2(run, run_name, save=False):
+    def add_event(ax, date, y=3.0, text="hi", down=True, dx_text=0.0):
+        if down:
+            y_event_head = y
+            y_event_tail = y_event_head + 0.5
+        else:
+            y_event_tail = y - 0.5
+            y_event_head = y
+        
+        arrow_scale = 5
+        arrow_color = "black"
+        arrow_lw = 1
+        arrow_shrink = 0.0
+        
+        x_event = mdates.date2num(date)
+        
+        x_tail, y_tail = x_event, y_event_tail
+        x_head, y_head = x_event, y_event_head
+        arrow = mpatches.FancyArrowPatch(
+            (x_tail, y_tail),
+            (x_head, y_head),
+            mutation_scale=arrow_scale,
+            arrowstyle="->",
+            color=arrow_color,
+            lw=arrow_lw,
+            shrinkA=arrow_shrink,
+            shrinkB=arrow_shrink,
+        )
+        ax.add_patch(arrow)
+        dy = 0.1 if down else - 0.1
+        ax.text(x_tail + dx_text, y_tail + dy, text, ha="center", va="bottom" if down else "top")
+    
+    fig = plt.figure(
+        figsize=(SINGLE_COLUMN, 0.5 * SINGLE_COLUMN),
+        dpi=500,
+        tight_layout=True,
+    )
+    ax = plt.gca()
+    axes = [ax]
+
+    colors = AGE_COLORMAP(np.linspace(0.2, 1, len(run["age_group_names"])))
+    
+    if run["weekly_base_R_t_samples"] is None:
+        print("No base R_t samples found in run")
+        return 0
+    
+    err_low = np.percentile(run["weekly_base_R_t_samples"], 2.5, axis=0)
+    err_high = np.percentile(run["weekly_base_R_t_samples"], 97.5, axis=0)
+
+    for ag in run["age_groups"]:
+        axes[0].plot(
+            run["week_dates"],
+            run["median_weekly_base_R_t"][:, ag],
+            label=run["age_group_names"][ag],
+            c=colors[ag],
+            ls="-",
+        )
+#         print(ag)
+        axes[0].fill_between(
+            run["week_dates"], err_low[:, ag], err_high[:, ag], color=colors[ag], alpha=0.4, linewidth=0)
+    
+    
+    
+    y_arrow = 4.0
+    arrow_scale = 3
+    arrow_color = "black"
+    arrow_lw = 1
+    arrow_shrink = 0.0
+    
+    x_tail, y_tail = mdates.date2num(START_FIRST_WAVE), y_arrow
+    x_head, y_head = mdates.date2num(END_FIRST_WAVE), y_arrow
+    dx = x_head - x_tail
+    arrow = mpatches.FancyArrowPatch(
+        (x_tail, y_tail),
+        (x_head, y_head),
+        mutation_scale=arrow_scale,
+        arrowstyle="|-|",
+        color=arrow_color,
+        lw=arrow_lw,
+        shrinkA=arrow_shrink,
+        shrinkB=arrow_shrink,
+        clip_on=False,
+    )
+    axes[0].add_patch(arrow)
+    axes[0].text(x_tail + 0.5*dx, y_head + 0.1, "3rd Wave", ha="center", va="bottom")
+    
+    x_tail, y_tail = mdates.date2num(START_SECOND_WAVE), y_arrow
+    x_head, y_head = mdates.date2num(END_SECOND_WAVE), y_arrow
+    dx = x_head - x_tail
+    arrow = mpatches.FancyArrowPatch(
+        (x_tail, y_tail),
+        (x_head, y_head),
+        mutation_scale=arrow_scale,
+        arrowstyle="|-|",
+        color=arrow_color,
+        lw=arrow_lw,
+        shrinkA=arrow_shrink,
+        shrinkB=arrow_shrink,
+        clip_on=False,
+    )
+    axes[0].add_patch(arrow)
+    axes[0].text(x_tail + 0.5*dx, y_head + 0.1, "4th Wave", ha="center", va="bottom")
+    
+    axes[0].set_ylabel("Base reproduction number")
+    axes[0].tick_params(axis="x", labelrotation=0)
+    axes[0].set_ylim(bottom=None, top=4.9)
+    axes[0].set_xlabel(2021)
+    
+    myFmt = mdates.DateFormatter('%b')
+    axes[0].xaxis.set_major_formatter(myFmt)
+    axes[0].set_xlim(left=datetime.date(year=2020, month=12, day=15), right=datetime.date(year=2021, month=12, day=31))
+
+    infection_dynamics_df = run["infection_dynamics_df"]
+    infection_dynamics_df = infection_dynamics_df[
+        infection_dynamics_df["Age_group"] != "total"
+    ]
+    infection_array = infection_dynamics_df.sort_values(["Sunday_date", "Age_group"])[
+        ["total_infections_observed"]
+    ].values.reshape((-1, 9))
+    weight_inf = infection_array[:-1, :]
+    weighted_inf_avg_base_R_t = (
+        run["median_weekly_base_R_t"][:-1, :] * weight_inf
+    ).sum(axis=0) / weight_inf.sum(axis=0)
+
+    #     axes[1].set_title("Reproduction Number")
+#     axes[1].bar(run["age_group_names"], weighted_inf_avg_base_R_t, color=colors)
+#     axes[1].set_ylabel("Infection weighted average\nbase reproduction number")
+#     axes[1].set_xlabel("Age group")
+#     axes[1].tick_params(axis="x", labelrotation=90, labelbottom=False)
+
+    h, l = axes[0].get_legend_handles_labels()
+    fig.legend(
+        handles=h,
+        labels=l,
+        ncol=5,
+        loc="lower right",
+        bbox_to_anchor=(0.99, 1.0),
+        title="Age group",
+        handletextpad=0.6,
+#         labelspacing=0.4,
+        columnspacing=1.6,
+    )
+
+    if save:
+        plt.savefig(OUTPUT_DIR / f"reproduction_number3_unc.pdf")
+
+    plt.show()
+
+
+run = RUNS[list(RUNS.keys())[0]]
+run_name = "test"
+print_R2(run=run, run_name=run_name, save=SAVE_PLOTS)
+
+
+# + code_folding=[0]
 def plot(save=False):
     LW_LOCAL = 0.8
     labelrotation = 45
