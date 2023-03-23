@@ -2,6 +2,8 @@
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![DOI](https://zenodo.org/badge/536191364.svg)](https://zenodo.org/badge/latestdoi/536191364)
+
 
 ![Methods diagram](methods_diagram.png)
 
